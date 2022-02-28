@@ -1,4 +1,4 @@
-# Generated from latte/front/antlr4/Latte.g4 by ANTLR 4.9.3
+# Generated from latte/front/parser/Latte.g4 by ANTLR 4.9.3
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .LatteParser import LatteParser
@@ -86,6 +86,11 @@ class LatteVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by LatteParser#varStatement.
     def visitVarStatement(self, ctx:LatteParser.VarStatementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by LatteParser#varInitialization.
+    def visitVarInitialization(self, ctx:LatteParser.VarInitializationContext):
         return self.visitChildren(ctx)
 
 

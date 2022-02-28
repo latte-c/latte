@@ -1,4 +1,4 @@
-# Generated from latte/front/antlr4/Latte.g4 by ANTLR 4.9.3
+# Generated from latte/front/parser/Latte.g4 by ANTLR 4.9.3
 from antlr4 import *
 from io import StringIO
 import sys

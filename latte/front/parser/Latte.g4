@@ -91,9 +91,9 @@ expressionStatement: expression ';';
 assignStatement: accessExpression '=' expression ';';
 
 varStatement:
-	latteType IDENTIFIER ('=' expression)? (
-		',' IDENTIFIER ('=' expression)?
-	)* ';';
+	latteType varInitialization (',' varInitialization)* ';';
+
+varInitialization: IDENTIFIER ('=' expression)?;
 
 expression:
 	op = ('-' | '!') expression								# unaryExpr

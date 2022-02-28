@@ -29,7 +29,7 @@ class ASTVisitor(LatteVisitor):
 
     def visitVarDeclaration(self, ctx: LatteParser.VarDeclarationContext):
         return ASTNode('var_declaration', [
-            # access modifier
+            # access modifier?
             ctx.EXPORT() != None,
             # type
             self.visit(ctx.latteType()),
@@ -40,7 +40,7 @@ class ASTVisitor(LatteVisitor):
 
     def visitProcedureDeclaration(self, ctx: LatteParser.ProcedureDeclarationContext):
         return ASTNode('procedure_declaration', [
-            # access modifier
+            # access modifier?
             ctx.EXPORT() != None,
             # return type
             self.visit(ctx.latteType()),
@@ -63,7 +63,66 @@ class ASTVisitor(LatteVisitor):
         return ASTNode('block_statement', list_map(self.visit, ctx.statement()))
 
     def visitIfStatement(self, ctx: LatteParser.IfStatementContext):
-        # condition, if-branch, else-branch
+        # condition, if-branch, else-branch?
         return ASTNode('if_statement', [self.visit(ctx.expression()), self.visit(ctx.statement(0)), self.visitOptional(ctx.statement(1))])
 
+    def visitLoopStatement(self, ctx: LatteParser.LoopStatementContext):
+        # loop-label?, loop-body
+        return ASTNode('loop_statement', [self.visitOptional(ctx.IDENTIFIER()), self.visit(ctx.statement())])
+
+    def visitBreakStatement(self, ctx: LatteParser.BreakStatementContext):
+        # break-label?
+        return ASTNode('break_statement', [self.visitOptional(ctx.IDENTIFIER())])
+
+    def visitContinueStatement(self, ctx: LatteParser.ContinueStatementContext):
+        # continue-label?
+        return ASTNode('continue_statement', [self.visitOptional(ctx.IDENTIFIER())])
+
+    def visitReturnStatement(self, ctx: LatteParser.ReturnStatementContext):
+        # return-expression
+        return ASTNode('return_statement', [self.visit(ctx.expression())])
+
+    def visitExpressionStatement(self, ctx: LatteParser.ExpressionStatementContext):
+        # expression
+        return ASTNode('expression_statement', [self.visit(ctx.expression())])
+
+    def visitAssignStatement(self, ctx: LatteParser.AssignStatementContext):
+        # left-hand right-hand
+        return ASTNode('assign_statement', [self.visit(ctx.accessExpression()), self.visit(ctx.expression())])
+
+    def visitVarStatement(self, ctx: LatteParser.VarStatementContext):
+        # type vars
+        return ASTNode('var_statement', [self.visit(ctx.latteType()), list_map(self.visit, ctx.varInitialization())])
+
+    def visitVarInitialization(self, ctx: LatteParser.VarInitializationContext):
+        # (name, initialization-expression)
+        return (self.getText(ctx.IDENTIFIER()), self.visitOptional(ctx.expression()))
+
+    def visitUnaryExpr(self, ctx: LatteParser.UnaryExprContext):
+        return ASTNode('unary_expression', [self.getText(ctx.op), self.visit(ctx.expression())])
+
+    def visitBinaryMulExpr(self, ctx: LatteParser.BinaryMulExprContext):
+        return ASTNode('binary_expression', [self.visit(ctx.expression(0)), self.getText(ctx.op), self.visit(ctx.expression(1))])
+
+    def visitBinaryAddExpr(self, ctx: LatteParser.BinaryAddExprContext):
+        return ASTNode('binary_expression', [self.visit(ctx.expression(0)), self.getText(ctx.op), self.visit(ctx.expression(1))])
+
+    def visitBinaryModExpr(self, ctx: LatteParser.BinaryModExprContext):
+        return ASTNode('binary_expression', [self.visit(ctx.expression(0)), self.getText(ctx.op), self.visit(ctx.expression(1))])
+
+    def visitBinaryCompExpr(self, ctx: LatteParser.BinaryCompExprContext):
+        return ASTNode('binary_expression', [self.visit(ctx.expression(0)), self.getText(ctx.op), self.visit(ctx.expression(1))])
+
+    def visitBinaryEqExpr(self, ctx: LatteParser.BinaryEqExprContext):
+        return ASTNode('binary_expression', [self.visit(ctx.expression(0)), self.getText(ctx.op), self.visit(ctx.expression(1))])
+
+    def visitBinaryAndExpr(self, ctx: LatteParser.BinaryAndExprContext):
+        return ASTNode('binary_expression', [self.visit(ctx.expression(0)), '&&', self.visit(ctx.expression(1))])
+
+    def visitBinaryOrExpr(self, ctx: LatteParser.BinaryOrExprContext):
+        return ASTNode('binary_expression', [self.visit(ctx.expression(0)), '||', self.visit(ctx.expression(1))])
+
+    def visitParenExpr(self, ctx: LatteParser.ParenExprContext):
+        return self.visit(ctx.expression())
+    
     
