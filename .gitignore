@@ -1,3 +1,2 @@
-build
-.gradle
-.idea
+/**/__pycache__
+latte/front/parser/.antlr
