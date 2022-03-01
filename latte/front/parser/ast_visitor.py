@@ -1,7 +1,9 @@
-from ast import AST
+from typing import cast
+
 from .ast_node import ASTNode
 from .LatteVisitor import LatteVisitor
 from .LatteParser import LatteParser
+import codecs
 
 
 def list_map(function, l):
@@ -10,7 +12,10 @@ def list_map(function, l):
 
 class ASTVisitor(LatteVisitor):
     def getText(self, t):
-        return t.getText()
+        if hasattr(t, 'text'):
+            return t.text
+        else:
+            return t.getText()
 
     def visitOptional(self, t):
         return None if t is None else self.visit(t)
@@ -124,5 +129,45 @@ class ASTVisitor(LatteVisitor):
 
     def visitParenExpr(self, ctx: LatteParser.ParenExprContext):
         return self.visit(ctx.expression())
-    
-    
+
+    def visitArrayExpr(self, ctx: LatteParser.ArrayExprContext):
+        return ASTNode('array_expression', list_map(self.visit, ctx.expression()))
+
+    def visitCallExpr(self, ctx: LatteParser.CallExprContext):
+        # call-procedure, arguments
+        return ASTNode('call_expression', [self.getText(ctx.IDENTIFIER()), list_map(self.visit, ctx.expression())])
+
+    def visitAccessExpr(self, ctx: LatteParser.AccessExprContext):
+        return self.visit(ctx.accessExpression())
+
+    def visitIntConstExpr(self, ctx: LatteParser.IntConstExprContext):
+        return int(ctx.getText())
+
+    def visitRealConstExpr(self, ctx: LatteParser.RealConstExprContext):
+        return float(ctx.getText())
+
+    def visitCharConstExpr(self, ctx: LatteParser.CharConstExprContext):
+        return ord(codecs.getdecoder('unicode_escape')(ctx.getText()[1:-1].encode('utf-8'))[0])
+
+    def visitStringConstExpr(self, ctx: LatteParser.StringConstExprContext):
+        string_literal = codecs.getdecoder('unicode_escape')(
+            ctx.getText()[1:-1].encode('utf-8'))[0]
+        # transform it into array_expression since it is alise for array
+        string_array = list_map(ord, string_literal)
+        string_array.append(0)  # C-style string terminal
+        return ASTNode('call_expression', string_array)
+
+    def visitAccessExpression(self, ctx: LatteParser.AccessExpressionContext):
+        # variable, index?
+        return ASTNode('access_expression', [self.getText(ctx.IDENTIFIER()), list_map(self.visit, ctx.expression())])
+
+    def visitLatteType(self, ctx: LatteParser.LatteTypeContext):
+        # (native_type, native_width), array_shape?
+        native_type = (self.getText(ctx.nativeType()),
+                       int(self.getText(ctx.INT_CONST())))
+        # array_shape could be None (not a array), [] (Any shape) or [...] (Certain shape)
+        return ASTNode('latte_type', [native_type, self.visitOptional(ctx.arrayShape())])
+
+    def visitArrayShape(self, ctx: LatteParser.ArrayShapeContext):
+        int_literals = list_map(self.getText, ctx.INT_CONST())
+        return int_literals
