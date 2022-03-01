@@ -1,5 +1,4 @@
 from latte.front import LatteFront
 
-
-frontend = LatteFront('test.latte')
+frontend = LatteFront('testcases/test.lt')
 frontend.print()
