@@ -50,11 +50,17 @@ class Constant(Value):
     def __init__(self, value: int | float, type: Optional[Type]=None):
         super().__init__(infer_type(value) if type is None else type)
         self.value = value
+    
+    def __str__(self):
+        return str(self.value)
 
 class Reg(Value):
-    def __init__(self, type: Type, index: int):
+    def __init__(self, type: Type, name: str):
         super().__init__(type)
-        self.index = index
+        self.name = name
+    
+    def __str__(self):
+        return '%{}'.format(self.name)
 
 class Directive:
     pass
@@ -62,6 +68,9 @@ class Directive:
 class Label(Directive):
     def __init__(self, name: str):
         self.name = name
+    
+    def __str__(self):
+        return '${}'.format(self.name)
 
 class Function:
     def __init__(self, name: str, ret_type: Type, params: List[Reg], body: List[Directive]):
@@ -76,8 +85,14 @@ class Module:
         self.directives: List[Directive] = []
         self.functions: Dict[str, Function] = {}
 
-    def add_directive(directive: Directive):
+    def add_directive(self, directive: Directive):
         self.directives.append(directive)
     
-    def add_function(function: Function):
+    def add_function(self, function: Function):
         self.functions[function.name] = function
+    
+    def print(self):
+        print('module {}'.format(self.name))
+
+        for fn in self.functions.values():
+            print('define {} @{}(...) {{}}'.format(fn.ret_type, fn.name))

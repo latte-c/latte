@@ -41,7 +41,9 @@ class LatteFront:
 
     def print(self):
         print_tree(self.ast_tree)
-
+    
+    def transform(self, fn):
+        return fn(self.ast_tree)
 
         # only expose this only
 __all__ = ['LatteFront', 'ASTNode']
