@@ -3,7 +3,7 @@ from typing import List
 from enum import Enum, unique, auto
 
 class Instruction(Directive):
-    def __init__(self, dsts: List[Reg], srcs: List[Value]):
+    def __init__(self, dsts: List[Reg]=[], srcs: List[Value]=[]):
         self.srcs = srcs
         self.dsts = dsts
     
@@ -117,3 +117,9 @@ class Move(Unary):
     
     def get_name(self) -> str:
         return 'mov'
+
+class Nop(Instruction):
+    def __str__(self):
+        return 'nop'
+
+NOP = Nop()
