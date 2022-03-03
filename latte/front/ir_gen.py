@@ -76,14 +76,14 @@ class IRGenerator:
     def visit_var_statement(self, node: ASTNode):
         var_type = self.visit_latte_type(node[0])
         for var_name, expr in node[1]:
+            lhs = self.reg_alloc.new(var_type)
+            self.add_var(var_name, lhs)
+            # TODO: optimize for r-valued rhs？
             if isinstance(expr, ASTNode):
                 rhs = self.visit(expr)
-                # TODO: should we emit move instruction?
-                self.add_var(var_name, rhs)
+                self.emit(Move(lhs, rhs))
             else:
-                lhs = self.reg_alloc.new(var_type)
                 imm = Constant(expr)
-                self.add_var(var_name, lhs)
                 self.emit(LoadImm(lhs, imm))
     
     def visit_assign_statement(self, node: ASTNode):
