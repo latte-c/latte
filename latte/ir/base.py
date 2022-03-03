@@ -6,6 +6,7 @@ class BaseType(Enum):
     INT = auto()
     FP = auto()
     ERR = auto()
+    VOID = auto()
 
 INT_T = BaseType.INT
 FP_T = BaseType.FP
@@ -21,9 +22,15 @@ class Type:
                 s = 'i{}'.format(self.width)
             case BaseType.FLOAT:
                 s = 'f{}'.format(self.width)
+            case BaseType.VOID:
+                s = 'void'
             case _:
                 s = '<err-type>'
         return s
+    
+    def __add__(self, rhs):
+        # TODO
+        return self
 
 def int_type(width: int=32) -> Type:
     return Type(INT_T, width)
@@ -34,6 +41,7 @@ def float_type(width: int=32) -> Type:
 I32 = int_type(32)
 F32 = float_type(32)
 ERR_T = Type(BaseType.ERR, 0)
+VOID_T = Type(BaseType.VOID, 0)
 
 def infer_type(value: int | float) -> Type:
     if isinstance(value, int):
@@ -78,6 +86,9 @@ class Function:
         self.ret_type = ret_type
         self.params = params
         self.body = body
+    
+    def add(self, directive: Directive):
+        self.body.append(directive)
 
 class Module:
     def __init__(self, name: str):
@@ -95,4 +106,11 @@ class Module:
         print('module {}'.format(self.name))
 
         for fn in self.functions.values():
-            print('define {} @{}(...) {{}}'.format(fn.ret_type, fn.name))
+            params_str = ', '.join('{} {}'.format(r.type, r) for r in fn.params)
+            print('define {} @{}({}) {{'.format(fn.ret_type, fn.name, params_str))
+            for instr in fn.body:
+                if isinstance(instr, Label):
+                    print(instr, ':', sep='')
+                else:
+                    print('    ', instr, sep='')
+            print('}')

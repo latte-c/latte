@@ -8,11 +8,12 @@ class SymbolTable:
     
     def open_scope(self):
         self.scopes.append({})
+        return self.current_scope()
     
     def close_scope(self):
         self.scopes.pop()
     
-    def current_scope(self) -> :
+    def current_scope(self) -> Dict[str, T]:
         return self.scopes[-1]
     
     def lookup(self, name: str) -> Optional[T]:

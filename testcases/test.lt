@@ -4,8 +4,9 @@ export int(32) item = 1 + 2;
 
 export procedure int(32) foo(int(32) x) {
     int(32) t = 1;
+    int(32) w = x - 1;
     if (x > 3) {
-        t = x * 2;
+        t = x * 2 + w;
     }
     return x + t;
 }
