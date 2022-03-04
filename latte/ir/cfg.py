@@ -23,6 +23,9 @@ class CFG:
     def __getitem__(self, index: int) -> BasicBlock:
         return self.nodes[index]
     
+    def __len__(self):
+        return len(self.nodes)
+    
     def add_edge(self, u: int, v: int):
         n = len(self.nodes)
         assert 0 <= u < n and 0 <= v < n
@@ -33,10 +36,19 @@ class CFG:
         return self.edges[u][0]
 
     def succ_blocks(self, u: int) -> Sequence[BasicBlock]:
-        return (self.nodes[v] for v in self.succ(u))
+        return (self.nodes[v] for v in self.edges[u][0])
     
     def succ_items(self, u: int) -> Sequence[Tuple[int, BasicBlock]]:
-        return ((v, self.nodes[v]) for v in self.succ(u))
+        return ((v, self.nodes[v]) for v in self.edges[u][0])
+    
+    def pred(self, u: int) -> Set[int]:
+        return self.edges[u][1]
+    
+    def pred_blocks(self, u: int) -> Sequence[BasicBlock]:
+        return (self.nodes[v] for v in self.edges[u][1])
+    
+    def pred_items(self, u: int) -> Sequence[Tuple[int, BasicBlock]]:
+        return ((v, self.nodes[v]) for v in self.edges[u][1])
     
     def print(self):
         for i, bb in enumerate(self.nodes):
